@@ -18,13 +18,20 @@ pipeline {
                 }
             }
         }
-        stage('Deploy our image') {
+        stage('Push our image') {
             steps {
                 script {
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
                 }
+            }
+        }
+        stage("Deploy our application") {
+            steps {
+                sh "docker-compose up -d"
+                waitUntilServicesReady
+                echo 'Application has been successfully deployed.'
             }
         }
     }
