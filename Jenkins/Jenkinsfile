@@ -1,37 +1,11 @@
-pipeline {
-    environment {
-        registry = 'yanishub1/projet'
-        registryCredential = 'test'
-        dockerImage = ''
+node {
+  stage('SCM') {
+    checkout scm
+  }
+  stage('SonarQube Analysis') {
+    def scannerHome = tool 'Projet_sonar';
+    withSonarQubeEnv() {
+      sh "${scannerHome}/bin/sonar-scanner"
     }
-    agent any
-    stages {
-        stage('Cloning our Git') {
-            steps {
-                git 'https://github.com/Yanisb2003/projet'
-            }
-        }
-        stage('Building our image') {
-            steps {
-                script {
-                    dockerImage = docker.build registry + ':latest'
-                }
-            }
-        }
-        stage('Push our image') {
-            steps {
-                script {
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push()
-                    }
-                }
-            }
-        }
-        stage("Deploy our application") {
-            steps {
-                sh "docker-compose up -d"
-      	        echo 'Application has been successfully deployed.'
-            }
-        }
-    }
+  }
 }
